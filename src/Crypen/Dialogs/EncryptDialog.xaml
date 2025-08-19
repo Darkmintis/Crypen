@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Crypen.Dialogs.EncryptDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Crypen.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    MinWidth="400">
+
+    <Grid RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Item Info -->
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="Item to encrypt:" FontWeight="SemiBold"/>
+            <TextBlock x:Name="ItemPathText" Text="Path goes here" TextWrapping="Wrap"/>
+        </StackPanel>
+        
+        <!-- Warning -->
+        <InfoBar Grid.Row="1"
+                 Title="Important"
+                 Message="Your original content will be securely deleted after encryption. Make sure you have a backup if needed."
+                 Severity="Warning"
+                 IsOpen="True"/>
+        
+        <!-- Password Fields -->
+        <StackPanel Grid.Row="2" Spacing="8">
+            <TextBlock Text="Password:" FontWeight="SemiBold"/>
+            <PasswordBox x:Name="PasswordBox" PlaceholderText="Enter password" PasswordChanged="PasswordBox_PasswordChanged"/>
+            
+            <TextBlock Text="Confirm Password:" FontWeight="SemiBold"/>
+            <PasswordBox x:Name="ConfirmPasswordBox" PlaceholderText="Confirm password" PasswordChanged="ConfirmPasswordBox_PasswordChanged"/>
+        </StackPanel>
+        
+        <!-- Password Strength Indicator -->
+        <StackPanel Grid.Row="3" Spacing="4">
+            <TextBlock Text="Password Strength:"/>
+            <ProgressBar x:Name="PasswordStrengthBar" Minimum="0" Maximum="100" Width="380" Height="4"/>
+            <TextBlock x:Name="PasswordStrengthText" Text="Weak" Foreground="#EF476F"/>
+        </StackPanel>
+        
+        <!-- Remember Password Option -->
+        <CheckBox Grid.Row="4" x:Name="RememberPasswordCheckbox" Content="Remember password" IsChecked="False"/>
+        
+        <!-- Error Message -->
+        <TextBlock Grid.Row="5" x:Name="ErrorMessageText" Foreground="#EF476F" TextWrapping="Wrap" Visibility="Collapsed"/>
+    </Grid>
+</UserControl>

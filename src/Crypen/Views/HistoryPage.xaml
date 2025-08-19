@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Crypen.Views.HistoryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Crypen.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Loaded="Page_Loaded">
+
+    <Grid RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Encryption History" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,10"/>
+        
+        <!-- Filter Controls -->
+        <Grid Grid.Row="1" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <ComboBox Grid.Column="0" x:Name="TypeFilterComboBox" 
+                      PlaceholderText="Filter by type" 
+                      Width="150"
+                      SelectionChanged="FilterControls_Changed">
+                <ComboBoxItem Content="All Types"/>
+                <ComboBoxItem Content="Files"/>
+                <ComboBoxItem Content="Folders"/>
+                <ComboBoxItem Content="USB Drives"/>
+            </ComboBox>
+            
+            <ComboBox Grid.Column="1" x:Name="StatusFilterComboBox" 
+                      PlaceholderText="Filter by status" 
+                      Width="150"
+                      SelectionChanged="FilterControls_Changed">
+                <ComboBoxItem Content="All Statuses"/>
+                <ComboBoxItem Content="Encrypted"/>
+                <ComboBoxItem Content="Decrypted"/>
+            </ComboBox>
+            
+            <AutoSuggestBox Grid.Column="2" x:Name="SearchBox" 
+                          PlaceholderText="Search by name"
+                          QueryIcon="Find"
+                          TextChanged="FilterControls_Changed"/>
+            
+            <Button Grid.Column="3" Content="Refresh" 
+                    Style="{StaticResource CrypenSecondaryButtonStyle}"
+                    Click="RefreshButton_Click"/>
+        </Grid>
+        
+        <!-- History Items -->
+        <toolkit:DataGrid Grid.Row="2" 
+                       x:Name="HistoryGrid" 
+                       AutoGenerateColumns="False" 
+                       IsReadOnly="True"
+                       GridLinesVisibility="Horizontal"
+                       SelectionMode="Single"
+                       DoubleTapped="HistoryGrid_DoubleTapped">
+            <toolkit:DataGrid.Columns>
+                <toolkit:DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <toolkit:DataGridTextColumn Header="Type" Binding="{Binding ItemType}" Width="SizeToHeader"/>
+                <toolkit:DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="SizeToHeader"/>
+                <toolkit:DataGridTextColumn Header="Date Encrypted" Binding="{Binding EncryptedAt}" Width="SizeToHeader"/>
+                <toolkit:DataGridCheckBoxColumn Header="Password Stored" Binding="{Binding IsPasswordStored}" Width="SizeToHeader"/>
+                <toolkit:DataGridTemplateColumn Header="Path" Width="2*">
+                    <toolkit:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
+                        </DataTemplate>
+                    </toolkit:DataGridTemplateColumn.CellTemplate>
+                </toolkit:DataGridTemplateColumn>
+                <toolkit:DataGridTemplateColumn Header="Actions" Width="Auto">
+                    <toolkit:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="Decrypt" 
+                                        Tag="{Binding Path}" 
+                                        Click="DecryptButton_Click" 
+                                        Visibility="{Binding Status, Converter={StaticResource StatusToVisibilityConverter}, ConverterParameter='Encrypted'}"
+                                        Style="{StaticResource CrypenPrimaryButtonStyle}"/>
+                                <Button Content="Remove" 
+                                        Tag="{Binding Id}" 
+                                        Click="RemoveButton_Click" 
+                                        Style="{StaticResource CrypenErrorButtonStyle}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </toolkit:DataGridTemplateColumn.CellTemplate>
+                </toolkit:DataGridTemplateColumn>
+            </toolkit:DataGrid.Columns>
+            
+            <!-- Empty state message -->
+            <toolkit:DataGrid.NoItemsContent>
+                <TextBlock Text="No encrypted items found. Add items by using the encryption features." 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center" 
+                       Foreground="Gray"
+                       TextAlignment="Center"
+                       Margin="0,40,0,0"/>
+            </toolkit:DataGrid.NoItemsContent>
+        </toolkit:DataGrid>
+    </Grid>
+</Page>

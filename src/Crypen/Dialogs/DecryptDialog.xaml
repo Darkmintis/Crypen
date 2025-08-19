@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Crypen.Dialogs.DecryptDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Crypen.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    MinWidth="400">
+
+    <Grid RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Item Info -->
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="Item to decrypt:" FontWeight="SemiBold"/>
+            <TextBlock x:Name="ItemPathText" Text="Path goes here" TextWrapping="Wrap"/>
+        </StackPanel>
+        
+        <!-- Password Field -->
+        <StackPanel Grid.Row="1" Spacing="8">
+            <TextBlock Text="Password:" FontWeight="SemiBold"/>
+            <PasswordBox x:Name="PasswordBox" PlaceholderText="Enter password" PasswordChanged="PasswordBox_PasswordChanged"/>
+        </StackPanel>
+        
+        <!-- Options -->
+        <CheckBox Grid.Row="2" x:Name="OverwriteExistingCheckbox" Content="Overwrite existing files if they exist" IsChecked="False"/>
+        
+        <!-- Error Message -->
+        <TextBlock Grid.Row="3" x:Name="ErrorMessageText" Foreground="#EF476F" TextWrapping="Wrap" Visibility="Collapsed"/>
+    </Grid>
+</UserControl>

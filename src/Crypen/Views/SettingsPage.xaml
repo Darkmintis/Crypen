@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Crypen.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Crypen.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Loaded="Page_Loaded">
+
+    <Grid RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Settings" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,10"/>
+        
+        <!-- Settings -->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="24" Margin="0,0,20,0">
+                <!-- Windows Integration -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Windows Integration" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <ToggleSwitch x:Name="RightClickToggle" 
+                                Header="Right-click menu integration" 
+                                IsOn="True"
+                                OffContent="Disabled"
+                                OnContent="Enabled"
+                                Toggled="RightClickToggle_Toggled"/>
+                    <TextBlock Text="Enable or disable Crypen in the Windows right-click menu." 
+                             Foreground="Gray" TextWrapping="Wrap"/>
+                </StackPanel>
+                
+                <!-- Security -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Security" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <ToggleSwitch x:Name="RememberPasswordsToggle" 
+                                Header="Remember passwords" 
+                                IsOn="True"
+                                OffContent="Disabled"
+                                OnContent="Enabled"
+                                Toggled="RememberPasswordsToggle_Toggled"/>
+                    <TextBlock Text="When enabled, Crypen can store passwords securely using Windows Data Protection API." 
+                             Foreground="Gray" TextWrapping="Wrap"/>
+                    
+                    <Button x:Name="ClearPasswordsButton" 
+                            Content="Clear All Stored Passwords" 
+                            Style="{StaticResource CrypenWarningButtonStyle}"
+                            Margin="0,12,0,0"
+                            Click="ClearPasswordsButton_Click"/>
+                </StackPanel>
+                
+                <!-- About -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="About Crypen" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Version:" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="VersionText" Text="1.0.0"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="License:" FontWeight="SemiBold"/>
+                        <TextBlock Text="MIT License"/>
+                    </StackPanel>
+                    
+                    <TextBlock Text="Crypen is an open-source file encryption utility for Windows." TextWrapping="Wrap" Margin="0,8,0,0"/>
+                    <TextBlock TextWrapping="Wrap">
+                        <Run Text="Source code available on GitHub:"/>
+                        <Hyperlink NavigateUri="https://github.com/darkmintis/crypen">
+                            https://github.com/darkmintis/crypen
+                        </Hyperlink>
+                    </TextBlock>
+                    
+                    <Button x:Name="CheckForUpdatesButton" 
+                            Content="Check for Updates" 
+                            Style="{StaticResource CrypenPrimaryButtonStyle}"
+                            Margin="0,12,0,0"
+                            Click="CheckForUpdatesButton_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
