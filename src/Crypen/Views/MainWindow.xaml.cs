@@ -3,6 +3,7 @@ using Crypen.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using System.Runtime.InteropServices;
 using WinRT.Interop;
 
@@ -14,6 +15,7 @@ namespace Crypen.Views;
 public sealed partial class MainWindow : Window
 {
     private AppService _appService;
+    private KeyboardShortcutHandler _keyboardHandler;
     private bool _hasRegisteredExtensions = false;
     
     // Content pages
@@ -33,8 +35,38 @@ public sealed partial class MainWindow : Window
         // Get app service
         _appService = App.Current.Services.GetRequiredService<AppService>();
         
+        // Set up keyboard shortcuts
+        _keyboardHandler = new KeyboardShortcutHandler(this);
+        this.Content.KeyDown += Content_KeyDown;
+        
         // Set initial page
         NavigateTo("dashboard");
+    }
+    
+    private void Content_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        _keyboardHandler.HandleKeyDown(e);
+    }
+    
+    // Public navigation methods for keyboard shortcuts
+    public void NavigateToDashboard() => NavigateTo("dashboard");
+    public void NavigateToEncryptPage() => NavigateTo("encrypt");
+    public void NavigateToHistory() => NavigateTo("history");
+    public void NavigateToSettings() => NavigateTo("settings");
+    
+    public void RefreshCurrentPage()
+    {
+        // Trigger a refresh on the current page if it supports it
+        if (ContentFrame.Content is DashboardPage dashboardPage)
+        {
+            // Dashboard has a LoadRecentItems method but it's private
+            // We could trigger a navigation refresh
+            ContentFrame.Navigate(typeof(DashboardPage));
+        }
+        else if (ContentFrame.Content is HistoryPage historyPage)
+        {
+            ContentFrame.Navigate(typeof(HistoryPage));
+        }
     }
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
