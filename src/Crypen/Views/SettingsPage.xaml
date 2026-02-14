@@ -47,6 +47,11 @@
                     <TextBlock Text="When enabled, Crypen can store passwords securely using Windows Data Protection API." 
                              Foreground="Gray" TextWrapping="Wrap"/>
                     
+                    <TextBlock x:Name="PasswordCountText" 
+                               Text="0 password(s) stored" 
+                               Foreground="Gray" 
+                               Margin="0,8,0,0"/>
+                    
                     <Button x:Name="ClearPasswordsButton" 
                             Content="Clear All Stored Passwords" 
                             Style="{StaticResource CrypenWarningButtonStyle}"
