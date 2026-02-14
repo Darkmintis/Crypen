@@ -117,6 +117,9 @@ public partial class App : Application
         // Register app service
         services.AddSingleton<AppService>();
         
+        // Register bulk operations service
+        services.AddSingleton<BulkOperationsService>();
+        
         return services.BuildServiceProvider();
     }
 }
