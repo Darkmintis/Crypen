@@ -50,7 +50,7 @@ public class CryptoService : ICryptoService
             long fileSizePosition = destinationFile.Position;
             await destinationFile.WriteAsync(BitConverter.GetBytes((long)0)); // Placeholder for file size
             
-            using var aes = new AesGcm(key);
+            using var aes = new AesGcm(key, AuthTagSizeBytes);
             byte[] buffer = new byte[ChunkSize];
             byte[] encryptedBuffer = new byte[ChunkSize + AuthTagSizeBytes];
             
@@ -114,7 +114,9 @@ public class CryptoService : ICryptoService
             
             // Read and verify header
             byte[] headerBytes = new byte[FileFormatVersion.Length];
-            await sourceFile.ReadAsync(headerBytes, 0, headerBytes.Length);
+            int headerBytesRead = await sourceFile.ReadAsync(headerBytes, 0, headerBytes.Length);
+            if (headerBytesRead != FileFormatVersion.Length)
+                return false;
             string header = System.Text.Encoding.UTF8.GetString(headerBytes);
             
             if (header != FileFormatVersion)
@@ -125,12 +127,15 @@ public class CryptoService : ICryptoService
             // Read salt and nonce
             byte[] salt = new byte[16];
             byte[] nonce = new byte[NonceSizeBytes];
-            await sourceFile.ReadAsync(salt, 0, salt.Length);
-            await sourceFile.ReadAsync(nonce, 0, nonce.Length);
+            if (await sourceFile.ReadAsync(salt, 0, salt.Length) != salt.Length)
+                return false;
+            if (await sourceFile.ReadAsync(nonce, 0, nonce.Length) != nonce.Length)
+                return false;
             
             // Read original file size
             byte[] fileSizeBytes = new byte[8];
-            await sourceFile.ReadAsync(fileSizeBytes, 0, fileSizeBytes.Length);
+            if (await sourceFile.ReadAsync(fileSizeBytes, 0, fileSizeBytes.Length) != fileSizeBytes.Length)
+                return false;
             long originalFileSize = BitConverter.ToInt64(fileSizeBytes, 0);
             
             // Derive the key using the stored salt
@@ -139,7 +144,7 @@ public class CryptoService : ICryptoService
             // Create the destination file
             using FileStream destinationFile = File.Create(destinationFilePath);
             
-            using var aes = new AesGcm(key);
+            using var aes = new AesGcm(key, AuthTagSizeBytes);
             byte[] encryptedBuffer = new byte[ChunkSize];
             byte[] decryptedBuffer = new byte[ChunkSize];
             byte[] tag = new byte[AuthTagSizeBytes];
@@ -154,10 +159,14 @@ public class CryptoService : ICryptoService
                 int bytesToRead = (int)Math.Min(ChunkSize, remainingBytes);
                 
                 // Read encrypted data
-                await sourceFile.ReadAsync(encryptedBuffer, 0, bytesToRead);
+                int encryptedBytesRead = await sourceFile.ReadAsync(encryptedBuffer, 0, bytesToRead);
+                if (encryptedBytesRead != bytesToRead)
+                    return false;
                 
                 // Read authentication tag
-                await sourceFile.ReadAsync(tag, 0, AuthTagSizeBytes);
+                int tagBytesRead = await sourceFile.ReadAsync(tag, 0, AuthTagSizeBytes);
+                if (tagBytesRead != AuthTagSizeBytes)
+                    return false;
                 
                 // Calculate the nonce for this chunk
                 byte[] chunkNonce = new byte[NonceSizeBytes];
@@ -334,8 +343,8 @@ public class CryptoService : ICryptoService
             }
             
             // Write the manifest
-            File.WriteAllText(crypenMarkerFile, "This drive is encrypted with Crypen.");
-            File.WriteAllLines(crypenDataFile, fileManifest);
+            await File.WriteAllTextAsync(crypenMarkerFile, "This drive is encrypted with Crypen.");
+            await File.WriteAllLinesAsync(crypenDataFile, fileManifest);
             
             return true;
         }
@@ -362,7 +371,7 @@ public class CryptoService : ICryptoService
             }
             
             // Read the manifest
-            string[] fileManifest = File.ReadAllLines(crypenDataFile);
+            string[] fileManifest = await File.ReadAllLinesAsync(crypenDataFile);
             
             // Decrypt each file listed in the manifest
             foreach (string relativePath in fileManifest)
@@ -371,8 +380,8 @@ public class CryptoService : ICryptoService
                 string decryptedFilePath = $"{driveLetter}:\\{relativePath}";
                 
                 // Create directory structure if needed
-                string directoryPath = Path.GetDirectoryName(decryptedFilePath);
-                if (!Directory.Exists(directoryPath))
+                string? directoryPath = Path.GetDirectoryName(decryptedFilePath);
+                if (!string.IsNullOrEmpty(directoryPath) && !Directory.Exists(directoryPath))
                 {
                     Directory.CreateDirectory(directoryPath);
                 }
@@ -407,7 +416,8 @@ public class CryptoService : ICryptoService
             
             // Read and verify header
             byte[] headerBytes = new byte[FileFormatVersion.Length];
-            await sourceFile.ReadAsync(headerBytes, 0, headerBytes.Length);
+            if (await sourceFile.ReadAsync(headerBytes, 0, headerBytes.Length) != headerBytes.Length)
+                return false;
             string header = System.Text.Encoding.UTF8.GetString(headerBytes);
             
             if (header != FileFormatVersion)
@@ -418,8 +428,10 @@ public class CryptoService : ICryptoService
             // Read salt and nonce
             byte[] salt = new byte[16];
             byte[] nonce = new byte[NonceSizeBytes];
-            await sourceFile.ReadAsync(salt, 0, salt.Length);
-            await sourceFile.ReadAsync(nonce, 0, nonce.Length);
+            if (await sourceFile.ReadAsync(salt, 0, salt.Length) != salt.Length)
+                return false;
+            if (await sourceFile.ReadAsync(nonce, 0, nonce.Length) != nonce.Length)
+                return false;
             
             // Skip file size
             sourceFile.Position += 8;
@@ -427,7 +439,7 @@ public class CryptoService : ICryptoService
             // Derive the key using the stored salt
             (byte[] key, _) = KeyDerivationService.DeriveKey(password, salt);
             
-            using var aes = new AesGcm(key);
+            using var aes = new AesGcm(key, AuthTagSizeBytes);
             
             // Just read the first chunk to verify
             byte[] encryptedBuffer = new byte[Math.Min(ChunkSize, (int)(sourceFile.Length - sourceFile.Position - AuthTagSizeBytes))];
@@ -435,10 +447,14 @@ public class CryptoService : ICryptoService
             byte[] tag = new byte[AuthTagSizeBytes];
             
             // Read first chunk of encrypted data
-            await sourceFile.ReadAsync(encryptedBuffer, 0, encryptedBuffer.Length);
+            int encBytesRead = await sourceFile.ReadAsync(encryptedBuffer, 0, encryptedBuffer.Length);
+            if (encBytesRead == 0)
+                return false;
             
             // Read authentication tag
-            await sourceFile.ReadAsync(tag, 0, tag.Length);
+            int tagBytesRead = await sourceFile.ReadAsync(tag, 0, tag.Length);
+            if (tagBytesRead != tag.Length)
+                return false;
             
             // Attempt to decrypt
             try
