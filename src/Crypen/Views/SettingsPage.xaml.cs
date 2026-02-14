@@ -1,3 +1,4 @@
+using Crypen.Core.Security;
 using Crypen.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -12,13 +13,15 @@ namespace Crypen.Views;
 public sealed partial class SettingsPage : Page
 {
     private RegistryService _registryService;
+    private PasswordStorageService _passwordStorage;
     
     public SettingsPage()
     {
         this.InitializeComponent();
         
-        // Get the registry service
+        // Get services
         _registryService = App.Current.Services.GetRequiredService<RegistryService>();
+        _passwordStorage = App.Current.Services.GetRequiredService<PasswordStorageService>();
         
         // Set version
         PackageVersion version = Package.Current.Id.Version;
@@ -28,9 +31,17 @@ public sealed partial class SettingsPage : Page
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
         // Initialize settings UI
-        // In a real app, these would be loaded from user settings
         RightClickToggle.IsOn = true;
         RememberPasswordsToggle.IsOn = true;
+        
+        // Update password count
+        UpdatePasswordCount();
+    }
+    
+    private void UpdatePasswordCount()
+    {
+        int count = _passwordStorage.GetStoredPasswordCount();
+        PasswordCountText.Text = $"{count} password(s) stored";
     }
 
     private void RightClickToggle_Toggled(object sender, RoutedEventArgs e)
@@ -47,7 +58,7 @@ public sealed partial class SettingsPage : Page
 
     private void RememberPasswordsToggle_Toggled(object sender, RoutedEventArgs e)
     {
-        // In a real app, this would save the setting
+        // This setting is now controlled per-encryption
     }
 
     private async void ClearPasswordsButton_Click(object sender, RoutedEventArgs e)
@@ -56,7 +67,7 @@ public sealed partial class SettingsPage : Page
         ContentDialog dialog = new ContentDialog
         {
             Title = "Clear All Passwords",
-            Content = "Are you sure you want to clear all stored passwords? This action cannot be undone.",
+            Content = $"Are you sure you want to clear all {_passwordStorage.GetStoredPasswordCount()} stored passwords? This action cannot be undone.",
             PrimaryButtonText = "Clear Passwords",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Close,
@@ -67,7 +78,8 @@ public sealed partial class SettingsPage : Page
         
         if (result == ContentDialogResult.Primary)
         {
-            // In a real app, this would clear all stored passwords
+            _passwordStorage.ClearAllPasswords();
+            UpdatePasswordCount();
             
             // Show confirmation
             ContentDialog confirmDialog = new ContentDialog
