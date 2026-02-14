@@ -15,6 +15,9 @@
             <!-- Converters -->
             <converters:StatusToVisibilityConverter x:Key="StatusToVisibilityConverter"/>
             <converters:EmptyCollectionToVisibilityConverter x:Key="EmptyCollectionToVisibilityConverter"/>
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:FileSizeConverter x:Key="FileSizeConverter"/>
+            <converters:DateTimeConverter x:Key="DateTimeConverter"/>
 
             <!-- Colors -->
             <SolidColorBrush x:Key="WindowCaptionBackground" Color="#1E1E1E"/>
