@@ -97,6 +97,26 @@ public class PasswordStorageService
         return passwords.Keys.ToList();
     }
     
+    /// <summary>
+    /// Clears all stored passwords
+    /// </summary>
+    public void ClearAllPasswords()
+    {
+        if (File.Exists(_storagePath))
+        {
+            File.Delete(_storagePath);
+        }
+    }
+    
+    /// <summary>
+    /// Gets the count of stored passwords
+    /// </summary>
+    public int GetStoredPasswordCount()
+    {
+        Dictionary<string, string> passwords = LoadPasswords();
+        return passwords.Count;
+    }
+    
     private Dictionary<string, string> LoadPasswords()
     {
         if (!File.Exists(_storagePath))
@@ -122,7 +142,7 @@ public class PasswordStorageService
         File.WriteAllText(_storagePath, json);
     }
     
-    private string GetItemId(string itemPath)
+    private static string GetItemId(string itemPath)
     {
         // Use a normalized path as the identifier
         return itemPath.ToLowerInvariant().Replace('\\', '/');
